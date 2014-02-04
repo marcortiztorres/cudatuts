@@ -24,7 +24,7 @@ void checkCudaError(string &s){
  	__syncthreads(); //Thanks GOD
 
  	int posOut = blockDim.x * (gridDim.x - 1 - blockIdx.x) + threadIdx.x;
-    d_out[posOut] = s_data[threadIdx.x];
+    	d_out[posOut] = s_data[threadIdx.x];
 
  }
 
