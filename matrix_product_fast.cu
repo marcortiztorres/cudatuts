@@ -3,7 +3,9 @@
 #include <cuda.h>
 using namespace std;
 
-void CheckCudaError(string &e);
+#define BLOCK_SIZE 10
+
+void CheckCudaError(const char *e);
 
 
 __global__ void productMatrix(int *matrix_a, int *matrix_b, int *matrix_c)
@@ -27,7 +29,7 @@ __global__ void productMatrix(int *matrix_a, int *matrix_b, int *matrix_c)
 
 	for (int i = 0; i < BLOCK_SIZE; ++i)
 	{
-		suma += Asub[e][thready]* Bsub[threadx][e];
+		suma += Asub[i][thready]* Bsub[threadx][i];
 	}
 
 	__syncthreads();
@@ -37,7 +39,6 @@ __global__ void productMatrix(int *matrix_a, int *matrix_b, int *matrix_c)
 
 }
 
-#define BLOCK_SIZE 10
 
 int main(){
 
@@ -50,8 +51,8 @@ int main(){
 
 
 	//Apuntamos los punteros hacia un espacio de 100*100 elementos en el host
-	h_a = malloc(num_elements * sizeof(int));
-	h_b = malloc(num_elements * sizeof(int));
+	h_a = (int *) malloc(num_elements * sizeof(int));
+	h_b = (int *) malloc(num_elements * sizeof(int));
 	CheckCudaError("malloc_host_error");
 
 
@@ -91,7 +92,7 @@ int main(){
 
 	/*Esperamos a que todos los threads hayan hecho su trabajo (multiplicar las matrizes)
 		antes de copy back.*/
-	cudaThreadSyncronize();
+	cudaThreadSynchronize();
 	CheckCudaError("Syncronize_threads_error");
 
 
@@ -117,7 +118,7 @@ int main(){
 }
 
 
-void CheckCudaError(string &e)
+void CheckCudaError(const char *e)
 {	
 	//Obtenemos el ultimo error.
 	cudaError_t err = cudaGetLastError();
